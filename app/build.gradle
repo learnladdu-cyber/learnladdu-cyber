@@ -1,0 +1,109 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+}
+
+android {
+    namespace 'com.ashis.notesphare'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'com.ashis.notesphare'
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName '1.0'
+
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+        vectorDrawables {
+            useSupportLibrary true
+        }
+
+        def configValue = { String name, String fallback ->
+            def value = project.findProperty(name) ?: System.getenv(name) ?: fallback
+            return '"' + value.toString().replace('\\', '\\\\').replace('"', '\\"') + '"'
+        }
+        buildConfigField 'String', 'SUPABASE_URL', configValue('SUPABASE_URL', '')
+        buildConfigField 'String', 'SUPABASE_ANON_KEY', configValue('SUPABASE_ANON_KEY', '')
+        buildConfigField 'String', 'SUPABASE_REDIRECT_URL', configValue('SUPABASE_REDIRECT_URL', 'notesphare://auth-callback')
+        buildConfigField 'String', 'SUPABASE_STORAGE_BUCKET', configValue('SUPABASE_STORAGE_BUCKET', 'notesphare-attachments')
+    }
+
+    buildFeatures {
+        compose true
+        buildConfig true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    packaging {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+            returnDefaultValues = true
+            all {
+                systemProperty 'robolectric.conscryptMode', 'OFF'
+            }
+        }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
+dependencies {
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+    implementation libs.kotlinx.coroutines.android
+
+    implementation platform(libs.compose.bom)
+    implementation libs.compose.ui
+    implementation libs.compose.ui.graphics
+    implementation libs.compose.ui.tooling.preview
+    implementation libs.compose.foundation
+    implementation libs.compose.material3
+    implementation libs.compose.material.icons.extended
+    implementation libs.activity.compose
+    implementation libs.lifecycle.runtime.ktx
+    implementation libs.lifecycle.runtime.compose
+    implementation libs.lifecycle.viewmodel.compose
+    implementation libs.navigation.compose
+
+    implementation libs.room.runtime
+    implementation libs.room.ktx
+    ksp libs.room.compiler
+
+    implementation libs.datastore.preferences
+    implementation libs.work.runtime.ktx
+
+    debugImplementation libs.compose.ui.tooling
+    debugImplementation libs.compose.ui.test.manifest
+
+    testImplementation libs.junit
+    testImplementation libs.robolectric
+    testImplementation libs.androidx.test.core
+    testImplementation libs.room.testing
+    testImplementation libs.kotlinx.coroutines.test
+
+    androidTestImplementation platform(libs.compose.bom)
+    androidTestImplementation libs.compose.ui.test.junit4
+    androidTestImplementation libs.androidx.test.core
+    androidTestImplementation libs.androidx.test.junit
+    androidTestImplementation libs.androidx.test.runner
+    androidTestImplementation libs.espresso.core
+    androidTestImplementation libs.kotlinx.coroutines.test
+}
