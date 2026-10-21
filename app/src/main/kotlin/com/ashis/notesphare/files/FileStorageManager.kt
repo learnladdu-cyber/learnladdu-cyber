@@ -60,14 +60,21 @@ class FileStorageManager(
 
     fun importFromUri(noteId: Long, uri: Uri): ImportedFile {
         val resolver = context.contentResolver
-        var name = "Attachment"
+        val fallbackName = if (uri.scheme == "file") {
+            uri.lastPathSegment?.substringAfterLast('/')
+        } else {
+            null
+        }
+        var name = fallbackName?.takeIf { it.isNotBlank() } ?: "Attachment"
         var declaredSize: Long? = null
         runCatching {
             resolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE), null, null, null)
                 ?.use { cursor ->
                     if (cursor.moveToFirst()) {
                         val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-                        if (nameIndex >= 0) name = cursor.getString(nameIndex) ?: name
+                        if (nameIndex >= 0) {
+                            name = cursor.getString(nameIndex)?.takeIf { it.isNotBlank() } ?: name
+                        }
                         val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
                         if (sizeIndex >= 0 && !cursor.isNull(sizeIndex)) {
                             declaredSize = cursor.getLong(sizeIndex)

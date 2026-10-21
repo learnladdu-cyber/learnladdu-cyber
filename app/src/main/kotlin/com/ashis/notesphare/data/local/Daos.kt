@@ -11,22 +11,22 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NoteDao {
 
-    @Query("SELECT * FROM notes WHERE isTrashed = 0 AND isArchived = 0 ORDER BY isPinned DESC, updatedAt DESC")
+    @Query("SELECT * FROM notes WHERE deletedAt IS NULL AND isTrashed = 0 AND isArchived = 0 ORDER BY isPinned DESC, updatedAt DESC")
     fun observeActive(): Flow<List<NoteEntity>>
 
-    @Query("SELECT * FROM notes WHERE isTrashed = 0 AND isArchived = 0 AND isPinned = 1 ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM notes WHERE deletedAt IS NULL AND isTrashed = 0 AND isArchived = 0 AND isPinned = 1 ORDER BY updatedAt DESC")
     fun observePinned(): Flow<List<NoteEntity>>
 
-    @Query("SELECT * FROM notes WHERE isTrashed = 0 AND isArchived = 0 AND isPinned = 0 ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM notes WHERE deletedAt IS NULL AND isTrashed = 0 AND isArchived = 0 AND isPinned = 0 ORDER BY updatedAt DESC")
     fun observeRecent(): Flow<List<NoteEntity>>
 
-    @Query("SELECT * FROM notes WHERE isTrashed = 0 AND isArchived = 1 ORDER BY updatedAt DESC")
+    @Query("SELECT * FROM notes WHERE deletedAt IS NULL AND isTrashed = 0 AND isArchived = 1 ORDER BY updatedAt DESC")
     fun observeArchived(): Flow<List<NoteEntity>>
 
-    @Query("SELECT * FROM notes WHERE isTrashed = 1 ORDER BY trashedAt DESC")
+    @Query("SELECT * FROM notes WHERE deletedAt IS NULL AND isTrashed = 1 ORDER BY trashedAt DESC")
     fun observeTrashed(): Flow<List<NoteEntity>>
 
-    @Query("SELECT * FROM notes WHERE isTrashed = 0 AND isArchived = 0 AND folderId = :folderId ORDER BY isPinned DESC, updatedAt DESC")
+    @Query("SELECT * FROM notes WHERE deletedAt IS NULL AND isTrashed = 0 AND isArchived = 0 AND folderId = :folderId ORDER BY isPinned DESC, updatedAt DESC")
     fun observeInFolder(folderId: Long): Flow<List<NoteEntity>>
 
     @Query(
